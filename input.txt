@@ -1,0 +1,4 @@
+int i = 1;
+//miao
+string str = "\mi\\ao";
+i +=1;
