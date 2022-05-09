@@ -3,7 +3,8 @@
 #include "Exception.h"
 using namespace std;
 //空格*((注释2)|(数字3)|(标识符4)|(运算符5)|(字符串字面量6)|(英文标点7))
-const string Lexer::regexPat = R"([[:s:]]*((//.*)|([[:d:]]+)|([[:alpha:]][[:w:]]*)|(==|<=|>=|&&|\|\|)|("[^"]*")|([[:punct:]]))?)";
+const string Lexer::regexPat = 
+R"([[:s:]]*((//.*)|([[:d:]]+)|([[:alpha:]][[:w:]]*)|(==|<=|>=|&&|\|\|)|("[^"]*")|([[:punct:]]))?)";
 
 Lexer::Lexer(std::string fileName):file(fileName)
 {
@@ -90,7 +91,10 @@ void Lexer::AddToken(int line, int clm, std::smatch mth)
 			}
 			else if (mth[4].matched)
 			{
-				q.push(Token(TokenType::Identifier, mth.str(4), lineNumber, clm));
+				if (Token::Keywords.count(mth.str(4)) > 0)
+					q.push(Token(TokenType::Keyword, mth.str(4), lineNumber, clm));
+				else
+					q.push(Token(TokenType::Identifier, mth.str(4), lineNumber, clm));
 			}
 			else if(mth[5].matched)
 			{
@@ -106,7 +110,7 @@ void Lexer::AddToken(int line, int clm, std::smatch mth)
 			}
 			else
 			{
-				cout << "cant match this string:" << m << endl;
+				cout << "Cant match this string: " << m << " (line: " << line <<" column:" << clm << ")" << endl;
 			}
 		}
 	}

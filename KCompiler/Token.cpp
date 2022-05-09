@@ -4,7 +4,11 @@ using namespace std;
 
 const Token Token::TokenEOF = Token(TokenType::None, "", - 1, -1);
 const string Token::TokenEOL = "\\n";
-
+const std::unordered_set<std::string> Token::Keywords {
+"main", "print",
+"int", "float", "char", 
+"while", "if", "else", "for", "return", "continue", "do", "then", "end"
+};
 Token::Token(TokenType t, std::string val, int line, int column)
 {
 	type = t;
@@ -39,18 +43,16 @@ std::string Token::GetTypeString() const
 {
 	switch (type)
 	{
-	case Number:
+	case TokenType::Number:
 		return "Number";
-	case String:
-		return "String";
-	case Identifier:
+	case TokenType::Identifier:
 		return "Identifier";
-	case Punctuation:
-		return "Punctuation";
-	case Operator:
+	case TokenType::Operator:
 		return "Operator";
-	case Literal:
+	case TokenType::Literal:
 		return "Literal";
+	case TokenType::Keyword:
+		return "Keyword";
 	default:
 		break;
 	}

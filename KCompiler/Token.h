@@ -1,20 +1,18 @@
 #pragma once
 #include <bits/stdc++.h>
-enum TokenType
+enum class TokenType
 {
 	None,
 	//数字
 	Number,
-	//字符串
-	String,
 	//标识符
 	Identifier,
-	//标点
-	Punctuation,
 	//运算符
 	Operator,
 	//字符串字面量
 	Literal,
+	//关键字
+	Keyword,
 };
 class Token
 {
@@ -27,6 +25,7 @@ protected:
 public:
 	static const Token TokenEOF;
 	static const std::string TokenEOL;
+	static const std::unordered_set<std::string> Keywords;
 
 	Token(TokenType t, std::string val, int line, int column);
 	~Token();

@@ -1,34 +1,46 @@
 ﻿#include "Lexer.h"
+using namespace std;
 
-int main(int argc, char** arg)
+queue<vector<Token*>> lexer;
+
+void MakeLexer(std::string file)
 {
-    std::cout << "Hello World!\n";
-	Lexer lex("G:/KKCompiler/KCompiler/input.txt");
+	Lexer lex("G:/KCompiler/input.txt");
 	Token t = lex.Read();
 	while (t != Token::TokenEOF)
 	{
-		std::cout << t.GetText() << " Type:" << t.GetTypeString() <<
-			" Line:" << t.GetLineNumber() << " Column:" << t.GetColumnNumber() << std::endl;
+		vector<Token*> temp;
+		while (t.GetType() != TokenType::None)
+		{
+			temp.push_back(new Token(t));
+			std::cout << t.GetText() << "  Type:" << t.GetTypeString() <<
+				" Line:" << t.GetLineNumber() << " Column:" << t.GetColumnNumber() << std::endl;
+			t = lex.Read();
+		}
 		t = lex.Read();
+		if(temp.size() > 0)
+		lexer.push(temp);
 	}
-	std::cout << std::endl;
+	return;
+}
 
+void Main(std::string file)
+{
+	MakeLexer(file);
+
+}
+
+
+int main(int argc, char** arg)
+{
+	if (argc > 1)
+	{
+		Main(arg[1]);
+	}
+	else
+	{
+		Main("G:/KKCompiler/KCompiler/input.txt");
+	}
 	system("pause");
-
-//     if (argc > 1)
-//     {
-//         std::string str(arg[1]);
-//         Lexer lex(str);
-//         Token t = lex.Read();
-//         while (t != Token::TokenEOF)
-//         {
-//             std::cout << t.GetText() << " ";
-//         }
-//         std::cout << std::endl;
-//     }
-//     else
-//     {
-//         std::cerr << "param count error." << std::endl;
-//         return 0;
-//     }
+	return 0;
 }
