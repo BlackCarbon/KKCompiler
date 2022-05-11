@@ -11,10 +11,10 @@ R"([[:s:]]*((//.*)|([[:d:]]+)|([[:alpha:]][[:w:]]*)|(!=|==|<=|>=|&&|\|\|)|("[^"]
 Lexer::Lexer(std::string fileName):file(fileName)
 {
 	lineNumber = 0;
-	hasMore = true;
 	//file.open(fileName, std::ios::in);
 	rgx = regex(regexPat);
 	InitQ();
+	cout << "´Ê·¨·ÖÎö" << endl;
 }
 Lexer::~Lexer()
 {
@@ -23,6 +23,7 @@ Lexer::~Lexer()
 
 void Lexer::InitQ()
 {
+	ReadLine();
 	Token t = Read();
 	while (t != Token::TokenEOF)
 	{
@@ -39,29 +40,30 @@ void Lexer::InitQ()
 }
 std::vector<Token> Lexer::GetLine()
 {
+	if (lineQ.empty())
+	{
+		vector<Token> t;
+		return t;
+	}
 	auto temp = lineQ.front();
 	lineQ.pop();
 	return temp;
 }
 std::vector<Token> Lexer::PeekLine()
 {
+	if (lineQ.empty())
+	{
+		vector<Token> t;
+		return t;
+	}
 	return lineQ.front();
 }
 
 Token Lexer::Read()
 {
 	if (q.empty())
-	{
-		ReadLine();
-		if (q.empty())
-			return Token::TokenEOF;
-		else
-		{
-			auto temp = q.front();
-			q.pop();
-			return temp;
-		}
-	}
+		return Token::TokenEOF;
+
 	auto temp = q.front();
 	q.pop();
 	return temp;
@@ -76,30 +78,29 @@ Token Lexer::Peek(int i)
 void Lexer::ReadLine()
 {
 	string line;
-	try
+
+	while (!file.eof())
 	{
 		lineNumber += 1;
-		getline(file, line);
+		try
+		{
+			getline(file, line);
+		}
+		catch (Exception e)
+		{
+			throw new Exception(e);
+		}
+		int clm = 0;
+		string str = line;
+		smatch mth;
+		while (str != "" && regex_search(str, mth, rgx))
+		{
+			clm += mth.str(0).length();
+			AddToken(lineNumber, clm, mth);
+			str = mth.suffix();
+		}
+		q.push(Token(TokenType::None, Token::TokenEOL, lineNumber, line.length() - 1));
 	}
-	catch (Exception e)
-	{
-		throw new Exception(e);
-	}
-	if (file.eof())
-	{
-		hasMore = false;
-		return;
-	}
-	int clm = 0;
-	string str = line;
-	smatch mth;
-	while (str != "" && regex_search(str, mth, rgx))
-	{
-		clm += mth.str(0).length();
-		AddToken(lineNumber, clm, mth);
-		str = mth.suffix();
-	}
-	q.push(Token(TokenType::None, Token::TokenEOL, lineNumber, line.length() - 1));
 }
 void Lexer::AddToken(int line, int clm, std::smatch mth)
 {
@@ -131,8 +132,12 @@ void Lexer::AddToken(int line, int clm, std::smatch mth)
 			}
 			else if (mth[7].matched)
 			{
-				if(mth.str(7) != ";")
+				if (mth.str(7) != ";")
+				{
 					q.push(Token(TokenType::Operator, mth.str(7), lineNumber, clm));
+					if(mth.str(7) == ")")
+						q.push(Token(TokenType::None, Token::TokenEOL, lineNumber, clm));
+				}
 				else
 					q.push(Token(TokenType::None, mth.str(7), lineNumber, clm));
 			}

@@ -1,15 +1,17 @@
-void func()
-	print("miao");
+class Function
+	int value;
+	int function()return value
+	end
 end
 
-class Function
-
+void func(string str)
+	print(str);
 end
 
 int main()
 	int i,j,k=0
 	i = 1+2*3;i+=5
-	func()
+	func("miao")
 	return 0
 end
 

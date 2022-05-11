@@ -32,6 +32,11 @@ enum class ParserType
 	/// 运算符
 	/// </summary>
 	Operator,
+
+	/// <summary>
+	/// 类定义
+	/// </summary>
+	ClassDefinition,
 	/// <summary>
 	/// 函数调用
 	/// </summary>
@@ -61,9 +66,11 @@ enum class ParserType
 class ParserNode
 {
 public:
+	Token token;
 	ParserType type;
 	ParserNode* parentNode;
 	std::vector<ParserNode*> childrenNode;
 	ParserNode();
+	ParserNode(ParserType t, Token tkn);
 };
 

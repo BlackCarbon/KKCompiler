@@ -1,16 +1,17 @@
-﻿#include "Lexer.h"
+﻿#include "Parser.h"
 using namespace std;
 
-void MakeLexer(std::string file)
+void LexicalAnalysis(std::string file)
 {
 	Lexer lex("G:/KCompiler/input.txt");
-
+	Parser parser(&lex);
+	//parser.GenerateAST();
 	return;
 }
 
 void Main(std::string file)
 {
-	MakeLexer(file);
+	LexicalAnalysis(file);
 
 }
 

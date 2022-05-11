@@ -16,6 +16,13 @@ Token::Token(TokenType t, std::string val, int line, int column)
 	lineNumber = line;
 	columnNumber = column;
 }
+Token::Token()
+{
+	type = TokenType::None;
+	value = TokenEOL;
+	lineNumber = -1;
+	columnNumber = -1;
+}
 Token::~Token() {}
 int Token::GetLineNumber() const
 {

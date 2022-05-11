@@ -7,7 +7,6 @@ private:
 	static const std::string regexPat;
 
 	int lineNumber;
-	bool hasMore;
 	std::queue<Token> q;
 	std::ifstream file;
 	std::regex rgx;

@@ -36,7 +36,7 @@ public:
 	static const Token TokenEOF;
 	static const std::string TokenEOL;
 	static const std::unordered_set<std::string> Keywords;
-
+	Token();
 	Token(TokenType t, std::string val, int line, int column);
 	~Token();
 	int GetLineNumber() const;
