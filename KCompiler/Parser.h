@@ -7,7 +7,7 @@ private:
 	Lexer* lexer;
 	bool PeekClass(std::vector<Token> & line);
 	bool PeekFormula();
-	bool PeekFunctionCall();
+	bool PeekFunctionCall(std::vector<Token>& line);
 	bool PeekFunctionDeclaration(std::vector<Token>& line);
 	bool PeekFunctionDefinition();
 	bool PeekVariableDeclaration();

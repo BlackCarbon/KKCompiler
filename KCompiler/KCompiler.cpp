@@ -5,7 +5,7 @@ void LexicalAnalysis(std::string file)
 {
 	Lexer lex("G:/KCompiler/input.txt");
 	Parser parser(&lex);
-	//parser.GenerateAST();
+	parser.GenerateAST();
 	return;
 }
 
