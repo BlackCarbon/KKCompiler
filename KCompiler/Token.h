@@ -3,15 +3,25 @@
 enum class TokenType
 {
 	None,
-	//数字
+	/// <summary>
+	/// 数字
+	/// </summary>
 	Number,
-	//标识符
+	/// <summary>
+	/// 标识符
+	/// </summary>
 	Identifier,
-	//运算符
+	/// <summary>
+	/// 运算符
+	/// </summary>
 	Operator,
-	//字符串字面量
+	/// <summary>
+	/// 字符串字面量
+	/// </summary>
 	Literal,
-	//关键字
+	/// <summary>
+	/// 关键字
+	/// </summary>
 	Keyword,
 };
 class Token

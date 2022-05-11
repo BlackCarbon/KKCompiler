@@ -1,26 +1,10 @@
 ﻿#include "Lexer.h"
 using namespace std;
 
-queue<vector<Token*>> lexer;
-
 void MakeLexer(std::string file)
 {
 	Lexer lex("G:/KCompiler/input.txt");
-	Token t = lex.Read();
-	while (t != Token::TokenEOF)
-	{
-		vector<Token*> temp;
-		while (t.GetType() != TokenType::None)
-		{
-			temp.push_back(new Token(t));
-			std::cout << t.GetText() << "  Type:" << t.GetTypeString() <<
-				" Line:" << t.GetLineNumber() << " Column:" << t.GetColumnNumber() << std::endl;
-			t = lex.Read();
-		}
-		t = lex.Read();
-		if(temp.size() > 0)
-		lexer.push(temp);
-	}
+
 	return;
 }
 

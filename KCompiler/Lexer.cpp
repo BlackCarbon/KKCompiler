@@ -1,10 +1,12 @@
 #include <bits/stdc++.h>
 #include "Lexer.h"
 #include "Exception.h"
+#include "Token.h"
+
 using namespace std;
 //空格*((注释2)|(数字3)|(标识符4)|(运算符5)|(字符串字面量6)|(英文标点7))
 const string Lexer::regexPat = 
-R"([[:s:]]*((//.*)|([[:d:]]+)|([[:alpha:]][[:w:]]*)|(==|<=|>=|&&|\|\|)|("[^"]*")|([[:punct:]]))?)";
+R"([[:s:]]*((//.*)|([[:d:]]+)|([[:alpha:]][[:w:]]*)|(!=|==|<=|>=|&&|\|\|)|("[^"]*")|([[:punct:]]))?)";
 
 Lexer::Lexer(std::string fileName):file(fileName)
 {
@@ -12,11 +14,40 @@ Lexer::Lexer(std::string fileName):file(fileName)
 	hasMore = true;
 	//file.open(fileName, std::ios::in);
 	rgx = regex(regexPat);
+	InitQ();
 }
 Lexer::~Lexer()
 {
 	file.close();
 }
+
+void Lexer::InitQ()
+{
+	Token t = Read();
+	while (t != Token::TokenEOF)
+	{
+		vector<Token> temp;
+		while (t.GetType() != TokenType::None)
+		{
+			temp.push_back(t);
+			t = Read();
+		}
+		t = Read();
+		if (temp.size() > 0)
+			lineQ.push(temp);
+	}
+}
+std::vector<Token> Lexer::GetLine()
+{
+	auto temp = lineQ.front();
+	lineQ.pop();
+	return temp;
+}
+std::vector<Token> Lexer::PeekLine()
+{
+	return lineQ.front();
+}
+
 Token Lexer::Read()
 {
 	if (q.empty())
@@ -41,15 +72,7 @@ Token Lexer::Peek(int i)
 		return Token::TokenEOF;
 	return q.front();
 }
-bool Lexer::FillQueue(int i)
-{
-	while (i >= (int)q.size())
-		if (hasMore)
-			ReadLine();
-		else
-			return false;
-	return true;
-}
+
 void Lexer::ReadLine()
 {
 	string line;
@@ -62,7 +85,7 @@ void Lexer::ReadLine()
 	{
 		throw new Exception(e);
 	}
-	if (line.length() == 0)
+	if (file.eof())
 	{
 		hasMore = false;
 		return;
@@ -92,7 +115,9 @@ void Lexer::AddToken(int line, int clm, std::smatch mth)
 			else if (mth[4].matched)
 			{
 				if (Token::Keywords.count(mth.str(4)) > 0)
+				{
 					q.push(Token(TokenType::Keyword, mth.str(4), lineNumber, clm));
+				}
 				else
 					q.push(Token(TokenType::Identifier, mth.str(4), lineNumber, clm));
 			}
@@ -106,7 +131,10 @@ void Lexer::AddToken(int line, int clm, std::smatch mth)
 			}
 			else if (mth[7].matched)
 			{
-				q.push(Token(TokenType::Operator, mth.str(7), lineNumber, clm));
+				if(mth.str(7) != ";")
+					q.push(Token(TokenType::Operator, mth.str(7), lineNumber, clm));
+				else
+					q.push(Token(TokenType::None, mth.str(7), lineNumber, clm));
 			}
 			else
 			{

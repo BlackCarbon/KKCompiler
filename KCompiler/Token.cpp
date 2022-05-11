@@ -4,9 +4,9 @@ using namespace std;
 
 const Token Token::TokenEOF = Token(TokenType::None, "", - 1, -1);
 const string Token::TokenEOL = "\\n";
-const std::unordered_set<std::string> Token::Keywords {
-"main", "print",
-"int", "float", "char", 
+const std::unordered_set<std::string> Token::Keywords{
+"main", "print", "class",
+"int", "float", "char", "void", "nil",
 "while", "if", "else", "for", "return", "continue", "do", "then", "end"
 };
 Token::Token(TokenType t, std::string val, int line, int column)

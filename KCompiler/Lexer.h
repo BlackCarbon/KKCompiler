@@ -4,23 +4,25 @@
 class Lexer
 {
 private:
+	static const std::string regexPat;
+
 	int lineNumber;
 	bool hasMore;
 	std::queue<Token> q;
 	std::ifstream file;
 	std::regex rgx;
-	bool FillQueue(int i);
-protected:
+	std::queue<std::vector<Token>> lineQ;
+	Token Read();
+	Token Peek(int i);
+	void InitQ();
 	void ReadLine();
 	void AddToken(int line, int clm, std::smatch mth);
 	std::string ToStringLiteral(std::string s);
 
 public:
-	static const std::string regexPat;
-
 	Lexer(std::string fileName);
 	~Lexer();
-	Token Read();
-	Token Peek(int i);
 
+	std::vector<Token>  GetLine();
+	std::vector<Token> PeekLine();
 };
