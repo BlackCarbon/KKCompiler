@@ -46,10 +46,6 @@ enum class ParserType
 	/// </summary>
 	FunctionDefinition,
 	/// <summary>
-	/// 函数声明
-	/// </summary>
-	FunctionDeclaration,
-	/// <summary>
 	/// 变量定义
 	/// </summary>
 	VariableDefinition,

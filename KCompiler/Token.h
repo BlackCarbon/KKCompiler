@@ -24,6 +24,19 @@ enum class TokenType
 	/// </summary>
 	Keyword,
 };
+enum class KeyWordType
+{
+	Main,
+	Func,
+	Condition,
+	Other,
+	Class,
+	Type,
+	Var,
+	Void,
+	Nil,
+};
+
 class Token
 {
 private:
@@ -35,7 +48,7 @@ protected:
 public:
 	static const Token TokenEOF;
 	static const std::string TokenEOL;
-	static const std::unordered_set<std::string> Keywords;
+	static const std::unordered_map<std::string, KeyWordType> Keywords;
 	Token();
 	Token(TokenType t, std::string val, int line, int column);
 	~Token();

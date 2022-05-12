@@ -6,17 +6,15 @@ class Parser
 private:
 	Lexer* lexer;
 	bool PeekClass(std::vector<Token> & line);
-	bool PeekFormula();
+	bool PeekFormula(std::vector<Token>& line);
 	bool PeekFunctionCall(std::vector<Token>& line);
-	bool PeekFunctionDeclaration(std::vector<Token>& line);
-	bool PeekFunctionDefinition();
-	bool PeekVariableDeclaration();
+	bool PeekFunctionDefinition(std::vector<Token>& line);
+	bool PeekVariableDeclaration(std::vector<Token>& line);
 	bool PeekVariableDefinition();
 
 	ParserNode* GetClass();
 	ParserNode* GetFormula();
 	ParserNode* GetFunctionCall();
-	ParserNode* GetFunctionDeclaration();
 	ParserNode* GetFunctionDefinition();
 	ParserNode* GetVariableDeclaration();
 	ParserNode* GetVariableDefinition();

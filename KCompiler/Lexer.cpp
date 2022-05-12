@@ -6,7 +6,7 @@
 using namespace std;
 //空格*((注释2)|(数字3)|(标识符4)|(运算符5)|(字符串字面量6)|(英文标点7))
 const string Lexer::regexPat = 
-R"([[:s:]]*((//.*)|([[:d:]]+)|([[:alpha:]][[:w:]]*)|(!=|==|<=|>=|&&|\|\|)|("[^"]*")|([[:punct:]]))?)";
+R"([[:s:]]*((//.*)|([[:d:]]+)|([[:alpha:]][[:w:]]*)|(--|\+\+|\+=|-=|\*=|/=|!=|==|<=|>=|&&|\|\|)|("[^"]*")|([[:punct:]]))?)";
 
 Lexer::Lexer(std::string fileName):file(fileName)
 {
@@ -14,7 +14,7 @@ Lexer::Lexer(std::string fileName):file(fileName)
 	//file.open(fileName, std::ios::in);
 	rgx = regex(regexPat);
 	InitQ();
-	cout << "词法分析" << endl;
+	cout << "词法分析完成" << endl;
 }
 Lexer::~Lexer()
 {

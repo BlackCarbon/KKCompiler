@@ -4,10 +4,16 @@ using namespace std;
 
 const Token Token::TokenEOF = Token(TokenType::None, "", - 1, -1);
 const string Token::TokenEOL = "\\n";
-const std::unordered_set<std::string> Token::Keywords{
-"main", "print", "class",
-"int", "float", "char", "void", "nil",
-"while", "if", "else", "for", "return", "continue", "do", "then", "end"
+const std::unordered_map<std::string, KeyWordType> Token::Keywords{
+{"main", KeyWordType::Main},
+{"print", KeyWordType::Func},
+{"while", KeyWordType::Condition}, {"if", KeyWordType::Condition}, {"for", KeyWordType::Condition}, {"do", KeyWordType::Condition},
+{"else", KeyWordType::Other}, {"return" , KeyWordType::Other}, {"continue", KeyWordType::Other}, {"then", KeyWordType::Other}, {"end", KeyWordType::Other},
+{"class", KeyWordType::Class},
+{"int", KeyWordType::Type}, {"float", KeyWordType::Type}, {"char", KeyWordType::Type},
+{"var", KeyWordType::Var},
+{"void", KeyWordType::Void},
+{"nil", KeyWordType::Nil}
 };
 Token::Token(TokenType t, std::string val, int line, int column)
 {

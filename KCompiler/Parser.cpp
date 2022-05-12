@@ -1,4 +1,5 @@
 #include "Parser.h"
+#include "OperatorRule.h"
 using namespace std;
 Parser::Parser(Lexer* lex)
 {
@@ -12,17 +13,24 @@ ParserNode* Parser::GenerateAST()
 	while (line.size() > 0)
 	{
 		cout << "line: " << line[0].GetLineNumber() << "【";
-		for (int i = 0; i < line.size(); i++)
+		for (size_t i = 0; i < line.size(); i++)
 			cout << " " << line[i].GetText();
 		cout << " 】";
 		if (PeekClass(line))
-			cout << " is Class. " << endl;
+			cout << " 为类定义 ";
 
 		if (PeekFunctionCall(line))
-			cout << " is FunctionCall. " << endl;
+			cout << " 为函数调用 ";
 
-		if (PeekFunctionDeclaration(line))
-			cout <<" is FunctionDeclaration. " << endl;
+		if (PeekFunctionDefinition(line))
+			cout <<" 为函数定义 ";
+
+		if (PeekVariableDeclaration(line))
+			cout << " 为变量声明 ";
+
+// 		if (PeekVariableDefinition(line))
+// 			cout << " 为函数定义 " << endl;
+
 
 		cout << endl;
 		line = lexer->GetLine();
@@ -49,7 +57,7 @@ ParserNode* Parser::GenerateAST()
 
 bool Parser::PeekClass(std::vector<Token>& line)
 {
-	if (line.size() == 2 && line[0].GetType() == TokenType::Keyword && line[0].GetText() == "class"
+	if (line.size() == 2 && line[0].GetType() == TokenType::Keyword && (Token::Keywords.at(line[0].GetText())) == KeyWordType::Class
 		&& line[1].GetType() == TokenType::Identifier)
 		return true;
 	return false;
@@ -72,8 +80,33 @@ ParserNode* Parser::GetClass()
 // 	new ParserNode(ParserType::ClassDefinition, line[0]);
 	return nullptr;
 }
-bool Parser::PeekFormula()
+bool Parser::PeekFormula(std::vector<Token>& line)
 {
+	if (line.size() == 1 &&
+		line[0].GetType() == TokenType::Identifier ||
+		line[0].GetType() == TokenType::Literal ||
+		line[0].GetType() == TokenType::Number)
+		return true;
+	TokenType typeLimit = TokenType::None;
+	stack<Token> stk;
+	
+	for (size_t i = line.size() - 1; i >= 0; i--)
+	{
+		auto typ = line[i].GetType();
+		if (typ == TokenType::Identifier || typ == TokenType::Literal || typ == TokenType::Number || typ == TokenType::Operator)
+		{
+			if (typ == TokenType::Literal || typ == TokenType::Number)
+			{
+				if (typeLimit == TokenType::None)
+					typeLimit = typ;
+				else if (typeLimit != typ)
+					return false;
+			}
+			stk.push(line[i]);
+		}
+		else
+			return false;
+	}
 	return false;
 }
 
@@ -87,10 +120,10 @@ bool Parser::PeekFunctionCall(std::vector<Token>& line)
 	if (line.size() < 1)
 		return false;
 	auto typ = line[0].GetType();
-	if (typ == TokenType::Identifier)
+	if (typ == TokenType::Identifier || Token::Keywords.at(line[0].GetText()) == KeyWordType::Func)
 	{
 		stack<Token> stk;
-		for (int i = 1; i < line.size(); i++)
+		for (size_t i = 1; i < line.size(); i++)
 		{
 			if (!stk.empty())
 			{
@@ -130,17 +163,17 @@ ParserNode* Parser::GetFunctionCall()
 
 	return nullptr;
 }
-bool Parser::PeekFunctionDeclaration(std::vector<Token>& line)
+bool Parser::PeekFunctionDefinition(std::vector<Token>& line)
 {
 	if (line.size() < 2)
 		return false;
 	auto typ = line[0].GetType();
 	auto typ1 = line[1].GetType();
-	if ((typ == TokenType::Keyword || typ == TokenType::Identifier) && 
-		(typ1 == TokenType::Keyword || typ1 == TokenType::Identifier))
+	if (((typ == TokenType::Keyword && (Token::Keywords.at(line[0].GetText()) == KeyWordType::Type || (Token::Keywords.at(line[0].GetText())) == KeyWordType::Void)) || typ == TokenType::Identifier) &&
+		(typ1 == TokenType::Identifier || (typ1 == TokenType::Keyword && (Token::Keywords.at(line[1].GetText())) == KeyWordType::Main)))
 	{
 		stack<Token> stk;
-		for (int i = 2; i < line.size(); i++)
+		for (size_t i = 2; i < line.size(); i++)
 		{
 			if (!stk.empty())
 			{
@@ -149,7 +182,7 @@ bool Parser::PeekFunctionDeclaration(std::vector<Token>& line)
 				{
 					stk.pop();
 					if (stk.top().GetType() == TokenType::Identifier ||
-						stk.top().GetType() == TokenType::Keyword)
+						(stk.top().GetType() == TokenType::Keyword && Token::Keywords.at(stk.top().GetText()) == KeyWordType::Type))
 						stk.pop();
 					else
 						return false;
@@ -178,23 +211,38 @@ bool Parser::PeekFunctionDeclaration(std::vector<Token>& line)
 	return false;
 }
 
-ParserNode* Parser::GetFunctionDeclaration()
-{
-	return nullptr;
-
-}
-bool Parser::PeekFunctionDefinition()
-{
-	return false;
-}
-
 ParserNode* Parser::GetFunctionDefinition()
 {
 	return nullptr;
 
 }
-bool Parser::PeekVariableDeclaration()
+bool Parser::PeekVariableDeclaration(std::vector<Token>& line)
 {
+	if (line.size() < 2)
+		return false;
+	auto typ = line[0].GetType();
+	if (((typ == TokenType::Keyword && (Token::Keywords.at(line[0].GetText()) == KeyWordType::Type || Token::Keywords.at(line[0].GetText()) == KeyWordType::Var)) || typ == TokenType::Identifier) &&
+		line[1].GetType() == TokenType::Identifier)
+	{
+		for (size_t i = 2; i < line.size(); i++)
+		{
+			if (i % 2 == 0)
+			{
+				if (line[i].GetType() != TokenType::Operator || line[i].GetText() != ",")
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if (line[i].GetType() != TokenType::Identifier)
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	return false;
 }
 

@@ -9,8 +9,11 @@ void func(string str)
 end
 
 int main()
+	var a,b
 	int i,j,k=0
 	i = 1+2*3;i+=5
+	k++
+	k*=5
 	func("miao")
 	return 0
 end
