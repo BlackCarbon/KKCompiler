@@ -56,14 +56,15 @@ enum class OperatorCombination
 class OperatorOrder
 {
 public:
+	bool isAssignmentOperator;
 	int leftOrder;
 	int rightOrder;
 	int priority;
 	OperatorCombination combination;
 
 	OperatorOrder();
-	OperatorOrder(int left, int right, int pry = 0, OperatorCombination cmb = OperatorCombination::Left);
-	OperatorOrder(OperatorDefine left, OperatorDefine right, int pry = 0, OperatorCombination cmb = OperatorCombination::Left);
+	OperatorOrder(int left, int right, int pry = 0, bool assignment = false, OperatorCombination cmb = OperatorCombination::Left);
+	OperatorOrder(OperatorDefine left, OperatorDefine right, int pry = 0, bool assignment = false, OperatorCombination cmb = OperatorCombination::Left);
 };
 class OperatorRule
 {

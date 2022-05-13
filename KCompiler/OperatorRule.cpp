@@ -3,20 +3,23 @@ OperatorOrder::OperatorOrder()
 {
 	leftOrder = 0;
 	rightOrder = 0;
+	isAssignmentOperator = false;
 	combination = OperatorCombination::Left;
 }
-OperatorOrder::OperatorOrder(int left, int right, int pry, OperatorCombination cmb)
+OperatorOrder::OperatorOrder(int left, int right, int pry, bool assignment, OperatorCombination cmb)
 {
 	leftOrder = left;
 	rightOrder = right;
 	priority = pry;
+	isAssignmentOperator = assignment;
 	combination = cmb;
 }
-OperatorOrder::OperatorOrder(OperatorDefine left, OperatorDefine right, int pry, OperatorCombination cmb)
+OperatorOrder::OperatorOrder(OperatorDefine left, OperatorDefine right, int pry, bool assignment, OperatorCombination cmb)
 {
 	leftOrder = (int)left;
 	rightOrder = (int)right;
 	priority = pry;
+	isAssignmentOperator = assignment;
 	combination = cmb;
 }
 OperatorDefine OperatorRule::TokenChangeToDefine(TokenType type)
@@ -37,17 +40,17 @@ OperatorDefine OperatorRule::TokenChangeToDefine(TokenType type)
 	return OperatorDefine::None;
 }
 const std::unordered_map<std::string, OperatorOrder> OperatorRule::operatorRule{
-	{"=", OperatorOrder(OperatorDefine::Identifier, OperatorDefine::Every)},
+	{"=", OperatorOrder(OperatorDefine::Identifier, OperatorDefine::Every, 0, true)},
 
 	{"+", OperatorOrder(OperatorDefine::Every, OperatorDefine::Every, 2)},
 	{"-", OperatorOrder(OperatorDefine::All, OperatorDefine::Every, 2)},
 	{"*", OperatorOrder(OperatorDefine::Every, OperatorDefine::Every, 4)},
 	{"/", OperatorOrder(OperatorDefine::Every, OperatorDefine::Every, 4)},
 
-	{"+=", OperatorOrder(OperatorDefine::Identifier, OperatorDefine::Every)},
-	{"-=", OperatorOrder((int)(OperatorDefine::Identifier), (int)(OperatorDefine::Number) | (int)(OperatorDefine::Formula))},
-	{"*=", OperatorOrder((int)(OperatorDefine::Identifier), (int)(OperatorDefine::Number) | (int)(OperatorDefine::Formula))},
-	{"/=", OperatorOrder((int)(OperatorDefine::Identifier), (int)(OperatorDefine::Number) | (int)(OperatorDefine::Formula))},
+	{"+=", OperatorOrder(OperatorDefine::Identifier, OperatorDefine::Every, 0, true)},
+	{"-=", OperatorOrder((int)(OperatorDefine::Identifier), (int)(OperatorDefine::Number) | (int)(OperatorDefine::Formula), 0, true)},
+	{"*=", OperatorOrder((int)(OperatorDefine::Identifier), (int)(OperatorDefine::Number) | (int)(OperatorDefine::Formula), 0, true)},
+	{"/=", OperatorOrder((int)(OperatorDefine::Identifier), (int)(OperatorDefine::Number) | (int)(OperatorDefine::Formula), 0, true)},
 
 	{"++", OperatorOrder(((int)(OperatorDefine::Number) | (int)(OperatorDefine::Formula) | (int)(OperatorDefine::Empty)),
 	((int)(OperatorDefine::Number) | (int)(OperatorDefine::Formula) | (int)(OperatorDefine::Empty)), 3)},

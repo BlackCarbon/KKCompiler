@@ -25,11 +25,11 @@ ParserNode* Parser::GenerateAST()
 		if (PeekFunctionDefinition(line))
 			cout <<" 为函数定义 ";
 
-		if (PeekVariableDeclaration(line))
-			cout << " 为变量声明 ";
+		if (PeekVariableFormula(line))
+			cout << " 为算式 ";
 
-// 		if (PeekVariableDefinition(line))
-// 			cout << " 为函数定义 " << endl;
+		if (PeekVariableDefinition(line))
+			cout << " 为变量声明定义 ";
 
 
 		cout << endl;
@@ -82,15 +82,14 @@ ParserNode* Parser::GetClass()
 }
 bool Parser::PeekFormula(std::vector<Token>& line)
 {
-	if (line.size() == 1 &&
-		line[0].GetType() == TokenType::Identifier ||
-		line[0].GetType() == TokenType::Literal ||
-		line[0].GetType() == TokenType::Number)
+	if (line.size() == 0)
+		return false;
+	if (line.size() == 1 && (line[0].GetType() == TokenType::Identifier || line[0].GetType() == TokenType::Literal || line[0].GetType() == TokenType::Number))
 		return true;
 	TokenType typeLimit = TokenType::None;
 	stack<Token> stk;
 	
-	for (size_t i = line.size() - 1; i >= 0; i--)
+	for (int i = line.size() - 1; i >= 0; i--)
 	{
 		auto typ = line[i].GetType();
 		if (typ == TokenType::Identifier || typ == TokenType::Literal || typ == TokenType::Number || typ == TokenType::Operator)
@@ -107,9 +106,92 @@ bool Parser::PeekFormula(std::vector<Token>& line)
 		else
 			return false;
 	}
+	auto tree = BuildFormulaTree(stk);
+	if (tree != nullptr)
+		return true;
 	return false;
 }
 
+OperatorNode* Parser::BuildFormulaTree(std::stack<Token>& stk)
+{
+	vector<OperatorNode*> nodes;
+	OperatorNode* root = new OperatorNode("");
+	while (!stk.empty())
+	{
+		auto token = stk.top();
+		stk.pop();
+		OperatorNode* node = nullptr;
+		if (token.GetType() == TokenType::Operator && token.GetText() == "(")
+		{
+			auto t = stk.top();
+			stack<Token> temp;
+			int count = 1;
+			while (count > 0)
+			{
+				if (t.GetType() == TokenType::Operator)
+				{
+					if(t.GetText() == "(")
+						count++;
+					if (t.GetText() == ")")
+						count--;
+				}
+				temp.push(t);
+				stk.pop();
+				if (stk.empty())
+				{
+					break;
+				}
+				t = stk.top();
+			}
+			temp.pop();
+			stack<Token> result;
+			while (!temp.empty())
+			{
+				result.push(temp.top());
+				temp.pop();
+			}
+			node = BuildFormulaTree(result);
+		}
+		else if (token.GetType() == TokenType::Operator)
+		{
+			if (root->value != "")
+			{
+				for (size_t i = 0; i < nodes.size(); i++)
+					delete nodes[i];
+				delete root;
+				return nullptr;
+			}
+			root->value = token.GetText();
+			if (nodes.size() > 0 &&
+				OperatorRule::operatorRule.at(root->value).priority > OperatorRule::operatorRule.at(nodes[nodes.size() - 1]->value).priority)
+			{
+				root->leftNode->parentNode = nullptr;
+				root->leftNode = nodes[nodes.size() - 1]->rightNode;
+				nodes[nodes.size() - 1]->rightNode->parentNode = root;
+			}
+		}
+		else
+		{
+			node = new OperatorNode(token.GetText());
+		}
+		if (node != nullptr)
+		{
+			if (root->leftNode == nullptr)
+				root->leftNode = node;
+			else
+			{
+				root->rightNode = node;
+				nodes.push_back(root);
+				root = new OperatorNode("");
+				root->leftNode = nodes[nodes.size() - 1];
+				root->leftNode->parentNode = root;
+			}
+		}
+	}
+	if(nodes.size() > 0)
+		return nodes[0];
+	return nullptr;
+}
 ParserNode* Parser::GetFormula()
 {
 	return nullptr;
@@ -216,7 +298,39 @@ ParserNode* Parser::GetFunctionDefinition()
 	return nullptr;
 
 }
-bool Parser::PeekVariableDeclaration(std::vector<Token>& line)
+bool Parser::PeekVariableFormula(std::vector<Token>& line)
+{
+	if (line.size() < 2)
+		return false;
+	auto typ = line[0].GetType();
+	if (line[0].GetType() == TokenType::Identifier)
+	{
+		auto token = line[1];
+		if (token.GetType() == TokenType::Operator && (token.GetText() == "++" || token.GetText() == "--") &&
+			line.size() == 2)
+			return true;
+
+		if (token.GetType() == TokenType::Operator &&
+			OperatorRule::operatorRule.count(token.GetText()) > 0 &&
+			OperatorRule::operatorRule.at(token.GetText()).isAssignmentOperator)
+		{
+			vector<Token> vec;
+			for (size_t k = 2; k < line.size(); k++)
+				vec.push_back(line[k]);
+			return PeekFormula(vec);
+		}
+		return false;
+	}
+	return false;
+
+}
+
+ParserNode* Parser::GetVariableFormula()
+{
+	return nullptr;
+
+}
+bool Parser::PeekVariableDefinition(std::vector<Token>& line)
 {
 	if (line.size() < 2)
 		return false;
@@ -228,10 +342,23 @@ bool Parser::PeekVariableDeclaration(std::vector<Token>& line)
 		{
 			if (i % 2 == 0)
 			{
-				if (line[i].GetType() != TokenType::Operator || line[i].GetText() != ",")
+				if (line[i].GetType() == TokenType::Operator && line[i].GetText() == ",")
 				{
-					return false;
+					continue;
 				}
+				if (line[i].GetType() == TokenType::Operator && (line[i].GetText() == "++" || line[i].GetText() == "--") &&
+					i == line.size() - 1)
+					return true;
+				if (line[i].GetType() == TokenType::Operator &&
+					OperatorRule::operatorRule.count(line[i].GetText()) > 0 &&
+					OperatorRule::operatorRule.at(line[i].GetText()).isAssignmentOperator)
+				{
+					vector<Token> vec;
+					for (size_t k = i + 1; k < line.size(); k++)
+						vec.push_back(line[k]);
+					return PeekFormula(vec);
+				}
+				return false;
 			}
 			else
 			{
@@ -243,16 +370,6 @@ bool Parser::PeekVariableDeclaration(std::vector<Token>& line)
 		}
 		return true;
 	}
-	return false;
-}
-
-ParserNode* Parser::GetVariableDeclaration()
-{
-	return nullptr;
-
-}
-bool Parser::PeekVariableDefinition()
-{
 	return false;
 }
 ParserNode* Parser::GetVariableDefinition()

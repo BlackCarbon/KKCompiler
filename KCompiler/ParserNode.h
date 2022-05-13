@@ -66,7 +66,21 @@ public:
 	ParserType type;
 	ParserNode* parentNode;
 	std::vector<ParserNode*> childrenNode;
+
 	ParserNode();
 	ParserNode(ParserType t, Token tkn);
+
+	~ParserNode();
 };
 
+class OperatorNode
+{
+public:
+	std::string value;
+	OperatorNode* leftNode;
+	OperatorNode* rightNode;
+	OperatorNode* parentNode;
+	OperatorNode();
+	OperatorNode(std::string val);
+	~OperatorNode();
+};
